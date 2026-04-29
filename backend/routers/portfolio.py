@@ -1,3 +1,4 @@
+import os
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete
@@ -7,6 +8,39 @@ from models import Portfolio
 from services.stock_service import get_realtime_quotes
 
 router = APIRouter(prefix="/api/portfolio", tags=["portfolio"])
+
+IS_VERCEL = bool(os.environ.get("VERCEL"))
+
+# Vercel 演示持仓（含实时行情计算好的字段）
+_DEMO_POSITIONS_RAW = [
+    {"id":1,"code":"600519","name":"贵州茅台","buy_price":1488.00,"quantity":10,  "current_price":1628.00,"buy_date":"2024-03-15","note":"白酒龙头，长期持有"},
+    {"id":2,"code":"300750","name":"宁德时代","buy_price":198.50, "quantity":30,  "current_price":212.80, "buy_date":"2024-06-20","note":"新能源赛道，看好未来"},
+    {"id":3,"code":"002594","name":"比亚迪",  "buy_price":242.00, "quantity":20,  "current_price":368.50, "buy_date":"2024-08-10","note":"新能源汽车高增长"},
+    {"id":4,"code":"600036","name":"招商银行","buy_price":32.80,  "quantity":100, "current_price":38.62,  "buy_date":"2024-10-05","note":"股息稳定，防御配置"},
+    {"id":5,"code":"688981","name":"中芯国际","buy_price":58.20,  "quantity":50,  "current_price":51.30,  "buy_date":"2025-01-08","note":"国产芯片替代逻辑"},
+]
+
+def _build_demo_portfolio():
+    positions = []
+    total_cost = 0
+    total_value = 0
+    for p in _DEMO_POSITIONS_RAW:
+        cost = p["buy_price"] * p["quantity"]
+        value = p["current_price"] * p["quantity"]
+        profit = value - cost
+        profit_pct = (profit / cost * 100) if cost else 0
+        total_cost += cost
+        total_value += value
+        positions.append({**p, "cost": cost, "value": value,
+                          "profit": profit, "profit_pct": profit_pct,
+                          "change_pct": 0.0, "created_at": "2024-01-01T00:00:00"})
+    total_profit = total_value - total_cost
+    total_profit_pct = (total_profit / total_cost * 100) if total_cost else 0
+    return {
+        "positions": positions,
+        "summary": {"total_cost": total_cost, "total_value": total_value,
+                    "total_profit": total_profit, "total_profit_pct": total_profit_pct}
+    }
 
 
 class PortfolioAdd(BaseModel):
@@ -27,6 +61,8 @@ class PortfolioUpdate(BaseModel):
 
 @router.get("")
 async def get_portfolio(db: AsyncSession = Depends(get_db)):
+    if IS_VERCEL:
+        return _build_demo_portfolio()
     result = await db.execute(select(Portfolio).order_by(Portfolio.created_at.desc()))
     items = result.scalars().all()
 

@@ -6,6 +6,7 @@ import Watchlist from './pages/Watchlist'
 import Portfolio from './pages/Portfolio'
 import StockDetail from './pages/StockDetail'
 import AddPosition from './pages/AddPosition'
+import { ErrorBoundary } from './components/ErrorBoundary'
 
 function AppRoutes() {
   const location = useLocation()
@@ -30,8 +31,10 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AppRoutes />
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </ErrorBoundary>
   )
 }

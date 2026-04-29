@@ -4,7 +4,6 @@ import { Trash2, Plus, Star } from 'lucide-react'
 import { getWatchlist, removeFromWatchlist } from '../services/api'
 import { PageLoader } from '../components/LoadingSpinner'
 import type { WatchlistItem } from '../types'
-import clsx from 'clsx'
 
 export default function Watchlist() {
   const navigate = useNavigate()
@@ -20,13 +19,10 @@ export default function Watchlist() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['watchlist'] }),
   })
 
-  if (isLoading) return (
-    <div className="pt-14"><PageLoader /></div>
-  )
+  if (isLoading) return (<div className="pt-14"><PageLoader /></div>)
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header */}
       <div className="bg-white px-5 pt-14 pb-4 sticky top-0 z-10 shadow-sm">
         <div className="flex items-center justify-between">
           <div>
@@ -34,7 +30,7 @@ export default function Watchlist() {
             <p className="text-xs text-gray-400 mt-0.5">共 {items.length} 只</p>
           </div>
           <button
-            onClick={() => navigate('/search')}
+            onClick={() => navigate('/analysis')}
             className="w-9 h-9 bg-primary-400 rounded-full flex items-center justify-center shadow-md active:scale-95 transition-transform"
           >
             <Plus size={18} className="text-white" />
@@ -50,10 +46,10 @@ export default function Watchlist() {
             </div>
             <div className="text-center">
               <p className="font-medium text-gray-700 mb-1">还没有自选股</p>
-              <p className="text-sm text-gray-400">搜索并收藏感兴趣的股票</p>
+              <p className="text-sm text-gray-400">从分析页面添加感兴趣的股票</p>
             </div>
-            <button className="btn-primary" onClick={() => navigate('/search')}>
-              去搜索添加
+            <button className="btn-primary" onClick={() => navigate('/analysis')}>
+              去添加
             </button>
           </div>
         ) : (
@@ -73,14 +69,8 @@ export default function Watchlist() {
   )
 }
 
-function WatchlistRow({
-  item,
-  onRemove,
-  onTap,
-}: {
-  item: WatchlistItem
-  onRemove: () => void
-  onTap: () => void
+function WatchlistRow({ item, onRemove, onTap }: {
+  item: WatchlistItem; onRemove: () => void; onTap: () => void
 }) {
   return (
     <div className="bg-white rounded-2xl shadow-card overflow-hidden flex">

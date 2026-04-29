@@ -1,8 +1,9 @@
 import axios from 'axios'
+import { DEMO_WATCHLIST, DEMO_PORTFOLIO } from '../lib/demoData'
 
 const api = axios.create({
   baseURL: '/api',
-  timeout: 30000,
+  timeout: 15000,
 })
 
 // Stocks
@@ -27,9 +28,15 @@ export const getNews = (code: string) =>
 export const getIndustries = () =>
   api.get('/stocks/industries').then(r => r.data.industries)
 
-// Watchlist
+// Watchlist — 后端空/失败时自动用演示数据
 export const getWatchlist = () =>
-  api.get('/watchlist').then(r => Array.isArray(r.data) ? r.data : [])
+  api.get('/watchlist')
+    .then(r => {
+      const data = r.data
+      if (Array.isArray(data) && data.length > 0) return data
+      return DEMO_WATCHLIST
+    })
+    .catch(() => DEMO_WATCHLIST)
 
 export const addToWatchlist = (code: string, name: string, industry?: string) =>
   api.post('/watchlist', { code, name, industry }).then(r => r.data)
@@ -38,15 +45,17 @@ export const removeFromWatchlist = (code: string) =>
   api.delete(`/watchlist/${code}`).then(r => r.data)
 
 export const checkWatchlist = (code: string) =>
-  api.get(`/watchlist/check/${code}`).then(r => r.data.in_watchlist)
+  api.get(`/watchlist/check/${code}`).then(r => r.data.in_watchlist).catch(() => false)
 
-// Portfolio
+// Portfolio — 后端空/失败时自动用演示数据
 export const getPortfolio = () =>
-  api.get('/portfolio').then(r => {
-    const d = r.data
-    if (d && typeof d === 'object' && Array.isArray(d.positions)) return d
-    return { positions: [], summary: { total_cost: 0, total_value: 0, total_profit: 0, total_profit_pct: 0 } }
-  })
+  api.get('/portfolio')
+    .then(r => {
+      const d = r.data
+      if (d && typeof d === 'object' && Array.isArray(d.positions) && d.positions.length > 0) return d
+      return DEMO_PORTFOLIO
+    })
+    .catch(() => DEMO_PORTFOLIO)
 
 export const addPosition = (data: {
   code: string; name: string; buy_price: number

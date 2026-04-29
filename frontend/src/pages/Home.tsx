@@ -117,7 +117,7 @@ export default function Home() {
               </button>
             </div>
             <div className="space-y-2.5">
-              {positions.slice(0, 3).map(pos => {
+              {positions.slice(0, 3).map((pos: any) => {
                 const isUp = pos.profit_pct >= 0
                 return (
                   <div

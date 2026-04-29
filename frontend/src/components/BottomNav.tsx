@@ -1,10 +1,10 @@
 import { NavLink } from 'react-router-dom'
-import { Home, Search, Star, TrendingUp } from 'lucide-react'
+import { Home, Sparkles, Star, TrendingUp } from 'lucide-react'
 import clsx from 'clsx'
 
 const tabs = [
   { to: '/', icon: Home, label: '首页' },
-  { to: '/search', icon: Search, label: '搜索' },
+  { to: '/analysis', icon: Sparkles, label: '股票分析' },
   { to: '/watchlist', icon: Star, label: '自选' },
   { to: '/portfolio', icon: TrendingUp, label: '持仓' },
 ]

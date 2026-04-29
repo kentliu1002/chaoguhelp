@@ -29,7 +29,7 @@ export const getIndustries = () =>
 
 // Watchlist
 export const getWatchlist = () =>
-  api.get('/watchlist').then(r => r.data)
+  api.get('/watchlist').then(r => Array.isArray(r.data) ? r.data : [])
 
 export const addToWatchlist = (code: string, name: string, industry?: string) =>
   api.post('/watchlist', { code, name, industry }).then(r => r.data)
@@ -42,7 +42,11 @@ export const checkWatchlist = (code: string) =>
 
 // Portfolio
 export const getPortfolio = () =>
-  api.get('/portfolio').then(r => r.data)
+  api.get('/portfolio').then(r => {
+    const d = r.data
+    if (d && typeof d === 'object' && Array.isArray(d.positions)) return d
+    return { positions: [], summary: { total_cost: 0, total_value: 0, total_profit: 0, total_profit_pct: 0 } }
+  })
 
 export const addPosition = (data: {
   code: string; name: string; buy_price: number
